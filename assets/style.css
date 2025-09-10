@@ -2,6 +2,11 @@ body {
 	max-width: 1920px;
 	margin: auto;
 }
+
+img {
+	max-height: 650px;
+}
+
 * {
 	font-family: 'Inter';
 	font-style: normal;
