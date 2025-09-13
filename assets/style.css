@@ -95,6 +95,12 @@ img {
 	font-size: 14px;
 }
 
+#carouselExampleIndicators .carousel-item img {
+    width: 100%;
+    height: auto;
+}
+
+
 #gallery {
 	/*	min-height: 100vh; */
 }
