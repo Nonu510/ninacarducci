@@ -56,7 +56,9 @@
       if (options.lightBox) {
         const img = $(this).is("img") ? $(this) : $(this).find("img");
         if (img.length) {
-          $.fn.mauGallery.methods.openLightBox(img, options.lightboxId);
+          // Stocker l'élément déclencheur pour la gestion du focus
+          const triggerElement = this;
+          $.fn.mauGallery.methods.openLightBox(img, options.lightboxId, triggerElement);
         }
       }
     });
@@ -103,14 +105,51 @@
         element.addClass("img-fluid");
       }
     },
-    openLightBox(element, lightboxId) {
+    openLightBox(element, lightboxId, triggerElement) {
       const targetId = lightboxId ? lightboxId : "galleryLightbox";
       const modalEl = document.getElementById(targetId);
       if (!modalEl) return;
 
+      // Stocker une référence à l'élément déclencheur
+      modalEl._triggerElement = triggerElement;
+      
       $(modalEl).find(".lightboxImage").attr("src", element.attr("src"));
 
-      // API Bootstrap 5 (plus de $(...).modal)
+      // Nettoyer les anciens événements
+      $(modalEl).off('shown.bs.modal hidden.bs.modal hide.bs.modal');
+      
+      $(modalEl).on('shown.bs.modal', function() {
+        // Utiliser inert au lieu d'aria-hidden
+        this.inert = false;
+      });
+
+      // Intercepter AVANT que la modale ne se ferme
+      $(modalEl).on('hide.bs.modal', function() {
+        // Retirer immédiatement le focus de tous les éléments dans la modale
+        const activeElement = document.activeElement;
+        if (activeElement && this.contains(activeElement)) {
+          activeElement.blur();
+        }
+        
+        // Utiliser inert pour masquer complètement la modale
+        this.inert = true;
+        
+        // Remettre le focus sur l'élément déclencheur
+        if (this._triggerElement && document.body.contains(this._triggerElement)) {
+          this._triggerElement.focus();
+        }
+      });
+
+      $(modalEl).on('hidden.bs.modal', function() {
+        // Double vérification après fermeture complète
+        if (this._triggerElement && document.body.contains(this._triggerElement)) {
+          setTimeout(() => {
+            this._triggerElement.focus();
+          }, 10);
+        }
+      });
+
+      // API Bootstrap 5
       const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
       modal.show();
     },
@@ -179,9 +218,8 @@
       $(".lightboxImage").attr("src", $(next).attr("src"));
     },
     createLightBox(gallery, lightboxId, navigation) {
-      gallery.append(`<div class="modal fade" id="${
-        lightboxId ? lightboxId : "galleryLightbox"
-      }" tabindex="-1" aria-hidden="true">
+      const modalId = lightboxId ? lightboxId : "galleryLightbox";
+      gallery.append(`<div class="modal fade" id="${modalId}" tabindex="-1">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-body position-relative">
@@ -200,6 +238,10 @@
           </div>
         </div>
       </div>`);
+      
+      // Utiliser inert au lieu d'aria-hidden
+      const modalEl = document.getElementById(modalId);
+      modalEl.inert = true;
     },
     showItemTags(gallery, position, tags) {
       var tagItems =
