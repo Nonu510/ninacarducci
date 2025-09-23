@@ -222,13 +222,13 @@
       gallery.append(`<div class="modal fade" id="${modalId}" tabindex="-1">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
-            <div class="modal-body position-relative">
+            <div class="modal-body position-relative" style="display: flex; justify-content: center; align-items: center; min-height: 400px;">
               ${
                 navigation
                   ? '<div class="mg-prev" style="cursor:pointer;position:absolute;top:50%;left:-15px;background:white;z-index:10;">&lt;</div>'
                   : '<span style="display:none;" />'
               }
-              <img class="lightboxImage img-fluid" alt="Contenu de l\'image affichée dans la modale au clic"/>
+              <img class="lightboxImage img-fluid" alt="Contenu de l\'image affichée dans la modale au clic" style="max-width: 100%; max-height: 80vh; width: auto; height: auto; object-fit: contain;"/>
               ${
                 navigation
                   ? '<div class="mg-next" style="cursor:pointer;position:absolute;top:50%;right:-15px;background:white;z-index:10;">&gt;</div>'
